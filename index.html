@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vinnie GLB Model</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
         body {
             margin: 0;
             padding: 0;
@@ -12,7 +14,12 @@
             overflow: hidden;
             font-family: 'Courier New', monospace;
         }
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        #canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
         
         @keyframes slideInFromBottom {
             0% {
@@ -46,11 +53,7 @@
                 transform: scale(1.05);
             }
         }
-        #canvas {
-            display: block;
-            width: 100vw;
-            height: 100vh;
-        }
+        
         #chat-container {
             position: absolute;
             bottom: 20px;
@@ -190,25 +193,25 @@
             bottom: 30px;
             left: 30px;
             display: flex;
-            flex-direction: column;
-            gap: 20px;
+            flex-direction: row;
+            gap: 15px;
             z-index: 100;
         }
         
         .social-btn {
             width: 60px;
             height: 60px;
-            border-radius: 50%;
+            border-radius: 8px;
             border: 3px solid #fff;
-            background: rgba(0, 0, 0, 0.8);
+            background: transparent;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s ease;
             animation: float 3s ease-in-out infinite;
-            backdrop-filter: blur(10px);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            text-decoration: none;
         }
         
         .social-btn:nth-child(2) {
@@ -223,29 +226,13 @@
         }
         
         .social-btn img {
-            width: 35px;
-            height: 35px;
+            width: 45px;
+            height: 45px;
             object-fit: contain;
             image-rendering: pixelated;
         }
         
         @media (max-width: 768px) {
-            #social-buttons {
-                bottom: 15px;
-                left: 15px;
-                gap: 15px;
-            }
-            
-            .social-btn {
-                width: 50px;
-                height: 50px;
-            }
-            
-            .social-btn img {
-                width: 30px;
-                height: 30px;
-            }
-        }
             #chat-container {
                 bottom: 10px;
                 left: 10px;
@@ -288,6 +275,22 @@
             #chat-input {
                 font-size: 8px;
                 padding: 10px;
+            }
+            
+            #social-buttons {
+                bottom: 15px;
+                left: 15px;
+                gap: 10px;
+            }
+            
+            .social-btn {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .social-btn img {
+                width: 35px;
+                height: 35px;
             }
         }
     </style>
