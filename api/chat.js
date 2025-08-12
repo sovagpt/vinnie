@@ -14,16 +14,17 @@ export default async function handler(req, res) {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022', // Latest Claude 3.5 Sonnet
+        model: 'claude-3-5-sonnet-20241022',
         max_tokens: 300,
         messages: [
           {
-            role: 'system', 
-            content: 'You are Bobby, a friendly and casual AI assistant. Keep responses conversational and under 2-3 sentences. Be helpful but maintain a laid-back personality.'
-          },
-          {
             role: 'user',
-            content: message
+            content: [
+              {
+                type: 'text',
+                text: `You are Bobby, a friendly and casual AI assistant. Keep responses conversational and under 2-3 sentences. Be helpful but maintain a laid-back personality. User says: ${message}`
+              }
+            ]
           }
         ]
       })
@@ -31,8 +32,21 @@ export default async function handler(req, res) {
 
     const data = await response.json();
     
+    // Debug logging
+    console.log('API Response:', JSON.stringify(data, null, 2));
+    
+    // Handle different response structures
+    let responseText = 'Sorry, I had trouble understanding that.';
+    
+    if (data.content && data.content.length > 0) {
+      responseText = data.content[0].text;
+    } else if (data.error) {
+      console.error('Anthropic API Error:', data.error);
+      responseText = 'Sorry, I had trouble connecting. Please try again!';
+    }
+    
     res.status(200).json({ 
-      response: data.content[0].text 
+      response: responseText 
     });
     
   } catch (error) {
