@@ -428,6 +428,7 @@
             const chatInput = document.getElementById('chat-input');
             const chatMessages = document.getElementById('chat-messages');
             let isTyping = false;
+            let currentAudio = null;
 
             function typeText(text, element, speed = 50) {
                 return new Promise((resolve) => {
@@ -446,6 +447,36 @@
                     
                     typeChar();
                 });
+            }
+
+            function playAudio(audioBase64) {
+                try {
+                    // Stop any currently playing audio
+                    if (currentAudio) {
+                        currentAudio.pause();
+                        currentAudio = null;
+                    }
+
+                    // Create and play new audio
+                    const audioBlob = new Blob([
+                        new Uint8Array(atob(audioBase64).split('').map(char => char.charCodeAt(0)))
+                    ], { type: 'audio/mpeg' });
+                    
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    currentAudio = new Audio(audioUrl);
+                    
+                    currentAudio.play().catch(error => {
+                        console.error('Audio playback failed:', error);
+                    });
+
+                    // Clean up URL when audio ends
+                    currentAudio.addEventListener('ended', () => {
+                        URL.revokeObjectURL(audioUrl);
+                        currentAudio = null;
+                    });
+                } catch (error) {
+                    console.error('Audio creation failed:', error);
+                }
             }
 
             function sendMessage() {
@@ -472,9 +503,46 @@
                 })
                 .then(response => response.json())
                 .then(async (data) => {
-                    // Wait a moment, then start typing bot response
+                    // Wait a moment for effect
                     setTimeout(async () => {
                         currentMessage.className = 'message bot-message';
+                        
+                        // Prepare audio first if available
+                        let audioReady = null;
+                        if (data.audio) {
+                            try {
+                                // Stop any currently playing audio
+                                if (currentAudio) {
+                                    currentAudio.pause();
+                                    currentAudio = null;
+                                }
+
+                                // Create audio but don't play yet
+                                const audioBlob = new Blob([
+                                    new Uint8Array(atob(data.audio).split('').map(char => char.charCodeAt(0)))
+                                ], { type: 'audio/mpeg' });
+                                
+                                const audioUrl = URL.createObjectURL(audioBlob);
+                                audioReady = new Audio(audioUrl);
+                                
+                                // Clean up URL when audio ends
+                                audioReady.addEventListener('ended', () => {
+                                    URL.revokeObjectURL(audioUrl);
+                                    currentAudio = null;
+                                });
+                            } catch (error) {
+                                console.error('Audio creation failed:', error);
+                            }
+                        }
+                        
+                        // Start typing and audio simultaneously
+                        if (audioReady) {
+                            currentAudio = audioReady;
+                            audioReady.play().catch(error => {
+                                console.error('Audio playback failed:', error);
+                            });
+                        }
+                        
                         await typeText(data.response, currentMessage, 80);
                         
                         isTyping = false;
