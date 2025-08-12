@@ -10,16 +10,110 @@
             padding: 0;
             background: #000;
             overflow: hidden;
+            font-family: Arial, sans-serif;
         }
         #canvas {
             display: block;
             width: 100vw;
             height: 100vh;
         }
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 12px;
+            max-width: 300px;
+        }
+        .control-group {
+            margin-bottom: 10px;
+        }
+        label {
+            display: inline-block;
+            width: 80px;
+            margin-right: 10px;
+        }
+        input[type="range"] {
+            width: 100px;
+        }
+        input[type="number"] {
+            width: 60px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            padding: 2px;
+        }
+        button {
+            background: #444;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin: 2px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #666;
+        }
+        #output {
+            margin-top: 10px;
+            padding: 10px;
+            background: #222;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 11px;
+            white-space: pre-wrap;
+        }
     </style>
 </head>
 <body>
     <canvas id="canvas"></canvas>
+    
+    <div id="controls">
+        <div class="control-group">
+            <h3>Camera Position</h3>
+            <label>X:</label><input type="range" id="camX" min="-10" max="10" step="0.1" value="0">
+            <input type="number" id="camXNum" step="0.1" value="0"><br>
+            <label>Y:</label><input type="range" id="camY" min="-10" max="10" step="0.1" value="0">
+            <input type="number" id="camYNum" step="0.1" value="0"><br>
+            <label>Z:</label><input type="range" id="camZ" min="-10" max="10" step="0.1" value="5">
+            <input type="number" id="camZNum" step="0.1" value="5"><br>
+        </div>
+        
+        <div class="control-group">
+            <h3>Camera Look At</h3>
+            <label>X:</label><input type="range" id="lookX" min="-10" max="10" step="0.1" value="0">
+            <input type="number" id="lookXNum" step="0.1" value="0"><br>
+            <label>Y:</label><input type="range" id="lookY" min="-10" max="10" step="0.1" value="0">
+            <input type="number" id="lookYNum" step="0.1" value="0"><br>
+            <label>Z:</label><input type="range" id="lookZ" min="-10" max="10" step="0.1" value="0">
+            <input type="number" id="lookZNum" step="0.1" value="0"><br>
+        </div>
+        
+        <div class="control-group">
+            <h3>Model Rotation</h3>
+            <label>X:</label><input type="range" id="rotX" min="0" max="6.28" step="0.1" value="0">
+            <input type="number" id="rotXNum" step="0.1" value="0"><br>
+            <label>Y:</label><input type="range" id="rotY" min="0" max="6.28" step="0.1" value="0">
+            <input type="number" id="rotYNum" step="0.1" value="0"><br>
+            <label>Z:</label><input type="range" id="rotZ" min="0" max="6.28" step="0.1" value="0">
+            <input type="number" id="rotZNum" step="0.1" value="0"><br>
+        </div>
+        
+        <div class="control-group">
+            <h3>Animation</h3>
+            <button id="playAnimation">Play Vinnie Idle</button>
+            <button id="stopAnimation">Stop Animation</button>
+        </div>
+        
+        <button id="getValues">Get Current Values</button>
+        <button id="resetCamera">Reset Camera</button>
+        
+        <div id="output"></div>
+    </div></body>
     
     <script type="importmap">
     {
@@ -35,7 +129,7 @@
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-        let scene, camera, renderer, controls;
+        let scene, camera, renderer, controls, model, mixer, idleAction;
 
         function init() {
             // Scene
@@ -69,7 +163,29 @@
             loader.load(
                 'https://raw.githubusercontent.com/sovagpt/vinnie/main/vinnie.glb',
                 function(gltf) {
-                    scene.add(gltf.scene);
+                    model = gltf.scene;
+                    scene.add(model);
+                    
+                    // Setup animation mixer
+                    if (gltf.animations && gltf.animations.length > 0) {
+                        mixer = new THREE.AnimationMixer(model);
+                        
+                        // Find Vinnie Idle animation
+                        const idleClip = gltf.animations.find(clip => clip.name === 'Vinnie Idle');
+                        if (idleClip) {
+                            idleAction = mixer.clipAction(idleClip);
+                            console.log('Found Vinnie Idle animation');
+                        } else {
+                            console.log('Available animations:', gltf.animations.map(a => a.name));
+                            // If no "Vinnie Idle", use first animation
+                            if (gltf.animations[0]) {
+                                idleAction = mixer.clipAction(gltf.animations[0]);
+                                console.log('Using first animation:', gltf.animations[0].name);
+                            }
+                        }
+                    }
+                    
+                    setupControls();
                 },
                 function(progress) {
                     console.log('Loading progress:', (progress.loaded / progress.total * 100) + '%');
@@ -83,8 +199,133 @@
             window.addEventListener('resize', onWindowResize);
         }
 
+        function setupControls() {
+            // Camera position controls
+            ['camX', 'camY', 'camZ'].forEach(id => {
+                const slider = document.getElementById(id);
+                const numberInput = document.getElementById(id + 'Num');
+                
+                slider.addEventListener('input', (e) => {
+                    numberInput.value = e.target.value;
+                    updateCamera();
+                });
+                
+                numberInput.addEventListener('input', (e) => {
+                    slider.value = e.target.value;
+                    updateCamera();
+                });
+            });
+
+            // Look at controls
+            ['lookX', 'lookY', 'lookZ'].forEach(id => {
+                const slider = document.getElementById(id);
+                const numberInput = document.getElementById(id + 'Num');
+                
+                slider.addEventListener('input', (e) => {
+                    numberInput.value = e.target.value;
+                    updateCamera();
+                });
+                
+                numberInput.addEventListener('input', (e) => {
+                    slider.value = e.target.value;
+                    updateCamera();
+                });
+            });
+
+            // Model rotation controls
+            ['rotX', 'rotY', 'rotZ'].forEach(id => {
+                const slider = document.getElementById(id);
+                const numberInput = document.getElementById(id + 'Num');
+                
+                slider.addEventListener('input', (e) => {
+                    numberInput.value = e.target.value;
+                    updateModelRotation();
+                });
+                
+                numberInput.addEventListener('input', (e) => {
+                    slider.value = e.target.value;
+                    updateModelRotation();
+                });
+            });
+
+            // Animation controls
+            document.getElementById('playAnimation').addEventListener('click', () => {
+                if (idleAction) {
+                    idleAction.reset().play();
+                }
+            });
+
+            document.getElementById('stopAnimation').addEventListener('click', () => {
+                if (idleAction) {
+                    idleAction.stop();
+                }
+            });
+
+            // Utility buttons
+            document.getElementById('getValues').addEventListener('click', getCurrentValues);
+            document.getElementById('resetCamera').addEventListener('click', resetCamera);
+        }
+
+        function updateCamera() {
+            const posX = parseFloat(document.getElementById('camXNum').value);
+            const posY = parseFloat(document.getElementById('camYNum').value);
+            const posZ = parseFloat(document.getElementById('camZNum').value);
+            
+            const lookX = parseFloat(document.getElementById('lookXNum').value);
+            const lookY = parseFloat(document.getElementById('lookYNum').value);
+            const lookZ = parseFloat(document.getElementById('lookZNum').value);
+            
+            camera.position.set(posX, posY, posZ);
+            controls.target.set(lookX, lookY, lookZ);
+            controls.update();
+        }
+
+        function updateModelRotation() {
+            if (!model) return;
+            
+            const rotX = parseFloat(document.getElementById('rotXNum').value);
+            const rotY = parseFloat(document.getElementById('rotYNum').value);
+            const rotZ = parseFloat(document.getElementById('rotZNum').value);
+            
+            model.rotation.set(rotX, rotY, rotZ);
+        }
+
+        function getCurrentValues() {
+            const output = document.getElementById('output');
+            const values = `Camera Position: ${camera.position.x.toFixed(2)}, ${camera.position.y.toFixed(2)}, ${camera.position.z.toFixed(2)}
+Camera Look At: ${controls.target.x.toFixed(2)}, ${controls.target.y.toFixed(2)}, ${controls.target.z.toFixed(2)}
+Model Rotation: ${model ? model.rotation.x.toFixed(2) : 0}, ${model ? model.rotation.y.toFixed(2) : 0}, ${model ? model.rotation.z.toFixed(2) : 0}`;
+            
+            output.textContent = values;
+            console.log(values);
+        }
+
+        function resetCamera() {
+            document.getElementById('camX').value = document.getElementById('camXNum').value = 0;
+            document.getElementById('camY').value = document.getElementById('camYNum').value = 0;
+            document.getElementById('camZ').value = document.getElementById('camZNum').value = 5;
+            document.getElementById('lookX').value = document.getElementById('lookXNum').value = 0;
+            document.getElementById('lookY').value = document.getElementById('lookYNum').value = 0;
+            document.getElementById('lookZ').value = document.getElementById('lookZNum').value = 0;
+            document.getElementById('rotX').value = document.getElementById('rotXNum').value = 0;
+            document.getElementById('rotY').value = document.getElementById('rotYNum').value = 0;
+            document.getElementById('rotZ').value = document.getElementById('rotZNum').value = 0;
+            
+            updateCamera();
+            updateModelRotation();
+        }
+
+        const clock = new THREE.Clock();
+
         function animate() {
             requestAnimationFrame(animate);
+            
+            const deltaTime = clock.getDelta();
+            
+            if (mixer) {
+                mixer.update(deltaTime);
+            }
+            
             controls.update();
             renderer.render(scene, camera);
         }
