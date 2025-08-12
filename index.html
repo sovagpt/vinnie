@@ -13,6 +13,39 @@
             font-family: 'Courier New', monospace;
         }
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        @keyframes slideInFromBottom {
+            0% {
+                transform: translate(-50%, 100vh) scale(0.8);
+                opacity: 0;
+            }
+            60% {
+                transform: translate(-50%, -30px) scale(1.05);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, 0) scale(1);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+        
+        @keyframes breathe {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
         #canvas {
             display: block;
             width: 100vw;
@@ -28,32 +61,32 @@
             display: flex;
             font-family: 'Press Start 2P', 'Courier New', monospace;
             font-size: 10px;
+            animation: slideInFromBottom 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         }
         
         #chat-portrait-container {
             position: relative;
             width: 140px;
-            height: 200px;
-            bottom: 20px;
+            height: 180px;
             z-index: 10;
         }
         
         #chat-portrait {
             width: 140px;
-            height: 200px;
+            height: 180px;
             background: #2a1810;
             border: 4px solid #fff;
-            border-bottom: none;
+            border-right: none;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            box-shadow: 2px 0 0 2px #888, -2px 0 0 2px #888, 0 -2px 0 2px #888;
+            box-shadow: 0 4px 0 2px #888, -4px 0 0 2px #888, 0 -4px 0 2px #888;
         }
         
         #chat-portrait img {
             width: 130px;
-            height: 190px;
+            height: 170px;
             object-fit: cover;
             image-rendering: pixelated;
             border: 2px solid #654321;
@@ -152,7 +185,67 @@
             color: #666;
         }
         
+        #social-buttons {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 100;
+        }
+        
+        .social-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: float 3s ease-in-out infinite;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .social-btn:nth-child(2) {
+            animation-delay: 1s;
+        }
+        
+        .social-btn:hover {
+            transform: scale(1.1) translateY(-5px);
+            border-color: #64ffda;
+            box-shadow: 0 8px 25px rgba(100, 255, 218, 0.4);
+            animation: breathe 2s ease-in-out infinite;
+        }
+        
+        .social-btn img {
+            width: 35px;
+            height: 35px;
+            object-fit: contain;
+            image-rendering: pixelated;
+        }
+        
         @media (max-width: 768px) {
+            #social-buttons {
+                bottom: 15px;
+                left: 15px;
+                gap: 15px;
+            }
+            
+            .social-btn {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .social-btn img {
+                width: 30px;
+                height: 30px;
+            }
+        }
             #chat-container {
                 bottom: 10px;
                 left: 10px;
@@ -164,18 +257,17 @@
             
             #chat-portrait-container {
                 width: 100px;
-                height: 160px;
-                bottom: 20px;
+                height: 140px;
             }
             
             #chat-portrait {
                 width: 100px;
-                height: 160px;
+                height: 140px;
             }
             
             #chat-portrait img {
                 width: 90px;
-                height: 150px;
+                height: 130px;
             }
             
             #chat-main-box {
@@ -203,17 +295,33 @@
 <body>
     <canvas id="canvas"></canvas>
     
+    <div id="social-buttons">
+        <a href="https://bags.fm" target="_blank" class="social-btn" title="Bags.fm">
+            <img src="https://cdn.prod.website-files.com/6740d85c4e3daeef29a89470/688eec4a9dc2bb9ca5c7bcdb_bags-icon.png" alt="Bags">
+        </a>
+        <a href="https://x.com" target="_blank" class="social-btn" title="X (Twitter)">
+            <img src="https://cdn.prod.website-files.com/6740d85c4e3daeef29a89470/688401711f7c1c43849d13a6_HIMACZhOn7YJ71dTu-actor-2fSSfmZramPBO73OK-iBihnF3pbp-dexpng%20(2).png" alt="X">
+        </a>
+    </div>
+    
     <div id="chat-container">
-        <div id="chat-portrait">
-            <img src="https://cdn.prod.website-files.com/6740d85c4e3daeef29a89470/689aaa21aa8c5cd6611c1403_12b65e88fcee46e5a609c5381dcdde42.png" alt="Bobby" id="bobby-portrait">
-        </div>
-        <div id="chat-content">
-            <div id="chat-messages">
-                <div class="message bot-message" id="current-message">Hey! I'm Bobby. What's up?</div>
+        <div id="chat-portrait-container">
+            <div id="chat-portrait">
+                <img src="https://cdn.prod.website-files.com/6740d85c4e3daeef29a89470/689aaa21aa8c5cd6611c1403_12b65e88fcee46e5a609c5381dcdde42.png" alt="Bobby" id="bobby-portrait">
             </div>
-            <div id="chat-input-container">
-                <div id="chat-prompt">></div>
-                <input type="text" id="chat-input" placeholder="Type your message..." maxlength="200">
+        </div>
+        <div id="chat-main-box">
+            <div id="chat-header">
+                BOBBY
+            </div>
+            <div id="chat-content">
+                <div id="chat-messages">
+                    <div class="message bot-message" id="current-message">Hey! I'm Bobby. What's up?</div>
+                </div>
+                <div id="chat-input-container">
+                    <div id="chat-prompt">></div>
+                    <input type="text" id="chat-input" placeholder="Type your message..." maxlength="200">
+                </div>
             </div>
         </div>
     </div>
