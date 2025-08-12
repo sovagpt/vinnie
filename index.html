@@ -17,103 +17,144 @@
             width: 100vw;
             height: 100vh;
         }
-        #controls {
+        #chat-container {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: rgba(0, 0, 0, 0.85);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        #chat-header {
             padding: 15px;
-            border-radius: 5px;
-            font-size: 12px;
-            max-width: 300px;
-        }
-        .control-group {
-            margin-bottom: 10px;
-        }
-        label {
-            display: inline-block;
-            width: 80px;
-            margin-right: 10px;
-        }
-        input[type="range"] {
-            width: 100px;
-        }
-        input[type="number"] {
-            width: 60px;
-            background: #333;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             color: white;
-            border: 1px solid #555;
-            padding: 2px;
+            font-weight: bold;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
         }
-        button {
-            background: #444;
+        
+        #chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .message {
+            max-width: 85%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .user-message {
+            background: #007AFF;
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        
+        .bot-message {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            align-self: flex-start;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .typing-indicator {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            align-self: flex-start;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-style: italic;
+        }
+        
+        #chat-input-container {
+            padding: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 10px;
+        }
+        
+        #chat-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+        
+        #chat-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        #chat-input:focus {
+            border-color: #007AFF;
+        }
+        
+        #send-button {
+            padding: 12px 16px;
+            background: #007AFF;
             color: white;
             border: none;
-            padding: 5px 10px;
-            margin: 2px;
-            border-radius: 3px;
+            border-radius: 20px;
             cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
         }
-        button:hover {
-            background: #666;
+        
+        #send-button:hover:not(:disabled) {
+            background: #0056CC;
         }
-        #output {
-            margin-top: 10px;
-            padding: 10px;
-            background: #222;
-            border-radius: 3px;
-            font-family: monospace;
-            font-size: 11px;
-            white-space: pre-wrap;
+        
+        #send-button:disabled {
+            background: rgba(255, 255, 255, 0.2);
+            cursor: not-allowed;
+        }
+        
+        @media (max-width: 768px) {
+            #chat-container {
+                bottom: 10px;
+                right: 10px;
+                left: 10px;
+                width: auto;
+                height: 400px;
+            }
         }
     </style>
 </head>
 <body>
     <canvas id="canvas"></canvas>
     
-    <div id="controls">
-        <div class="control-group">
-            <h3>Camera Position</h3>
-            <label>X:</label><input type="range" id="camX" min="-10" max="10" step="0.1" value="-0.45">
-            <input type="number" id="camXNum" step="0.1" value="-0.45"><br>
-            <label>Y:</label><input type="range" id="camY" min="-10" max="10" step="0.1" value="1.03">
-            <input type="number" id="camYNum" step="0.1" value="1.03"><br>
-            <label>Z:</label><input type="range" id="camZ" min="-10" max="10" step="0.1" value="1.87">
-            <input type="number" id="camZNum" step="0.1" value="1.87"><br>
+    <div id="chat-container">
+        <div id="chat-header">
+            💬 Chat with Bobby
         </div>
-        
-        <div class="control-group">
-            <h3>Camera Look At</h3>
-            <label>X:</label><input type="range" id="lookX" min="-10" max="10" step="0.1" value="-0.33">
-            <input type="number" id="lookXNum" step="0.1" value="-0.33"><br>
-            <label>Y:</label><input type="range" id="lookY" min="-10" max="10" step="0.1" value="0.52">
-            <input type="number" id="lookYNum" step="0.1" value="0.52"><br>
-            <label>Z:</label><input type="range" id="lookZ" min="-10" max="10" step="0.1" value="-0.38">
-            <input type="number" id="lookZNum" step="0.1" value="-0.38"><br>
+        <div id="chat-messages">
+            <div class="message bot-message">
+                Hey! I'm Bobby. What's up? 👋
+            </div>
         </div>
-        
-        <div class="control-group">
-            <h3>Model Rotation</h3>
-            <label>X:</label><input type="range" id="rotX" min="0" max="6.28" step="0.1" value="0">
-            <input type="number" id="rotXNum" step="0.1" value="0"><br>
-            <label>Y:</label><input type="range" id="rotY" min="0" max="6.28" step="0.1" value="0">
-            <input type="number" id="rotYNum" step="0.1" value="0"><br>
-            <label>Z:</label><input type="range" id="rotZ" min="0" max="6.28" step="0.1" value="0">
-            <input type="number" id="rotZNum" step="0.1" value="0"><br>
+        <div id="chat-input-container">
+            <input type="text" id="chat-input" placeholder="Type a message..." maxlength="500">
+            <button id="send-button">Send</button>
         </div>
-        
-        <div class="control-group">
-            <h3>Animation</h3>
-            <button id="playAnimation">Play Vinnie Idle</button>
-            <button id="stopAnimation">Stop Animation</button>
-        </div>
-        
-        <button id="getValues">Get Current Values</button>
-        <button id="resetCamera">Reset Camera</button>
-        
-        <div id="output"></div>
-    </div></body>
+    </div>
     
     <script type="importmap">
     {
@@ -188,7 +229,7 @@
                         }
                     }
                     
-                    setupControls();
+                    setupChat();
                 },
                 function(progress) {
                     console.log('Loading progress:', (progress.loaded / progress.total * 100) + '%');
@@ -202,120 +243,67 @@
             window.addEventListener('resize', onWindowResize);
         }
 
-        function setupControls() {
-            // Camera position controls
-            ['camX', 'camY', 'camZ'].forEach(id => {
-                const slider = document.getElementById(id);
-                const numberInput = document.getElementById(id + 'Num');
-                
-                slider.addEventListener('input', (e) => {
-                    numberInput.value = e.target.value;
-                    updateCamera();
-                });
-                
-                numberInput.addEventListener('input', (e) => {
-                    slider.value = e.target.value;
-                    updateCamera();
-                });
-            });
+        function setupChat() {
+            const chatInput = document.getElementById('chat-input');
+            const sendButton = document.getElementById('send-button');
+            const chatMessages = document.getElementById('chat-messages');
 
-            // Look at controls
-            ['lookX', 'lookY', 'lookZ'].forEach(id => {
-                const slider = document.getElementById(id);
-                const numberInput = document.getElementById(id + 'Num');
-                
-                slider.addEventListener('input', (e) => {
-                    numberInput.value = e.target.value;
-                    updateCamera();
-                });
-                
-                numberInput.addEventListener('input', (e) => {
-                    slider.value = e.target.value;
-                    updateCamera();
-                });
-            });
+            function sendMessage() {
+                const message = chatInput.value.trim();
+                if (!message) return;
 
-            // Model rotation controls
-            ['rotX', 'rotY', 'rotZ'].forEach(id => {
-                const slider = document.getElementById(id);
-                const numberInput = document.getElementById(id + 'Num');
-                
-                slider.addEventListener('input', (e) => {
-                    numberInput.value = e.target.value;
-                    updateModelRotation();
-                });
-                
-                numberInput.addEventListener('input', (e) => {
-                    slider.value = e.target.value;
-                    updateModelRotation();
-                });
-            });
+                // Add user message
+                addMessage(message, 'user');
+                chatInput.value = '';
+                sendButton.disabled = true;
 
-            // Animation controls
-            document.getElementById('playAnimation').addEventListener('click', () => {
-                if (idleAction) {
-                    idleAction.reset().play();
+                // Show typing indicator
+                const typingIndicator = addMessage('Bobby is typing...', 'typing');
+
+                // Send to API
+                fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Remove typing indicator
+                    chatMessages.removeChild(typingIndicator);
+                    
+                    // Add bot response
+                    addMessage(data.response, 'bot');
+                    sendButton.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Remove typing indicator
+                    chatMessages.removeChild(typingIndicator);
+                    
+                    // Add error message
+                    addMessage('Sorry, I had trouble connecting. Please try again!', 'bot');
+                    sendButton.disabled = false;
+                });
+            }
+
+            function addMessage(text, type) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type === 'user' ? 'user-message' : type === 'typing' ? 'typing-indicator' : 'bot-message'}`;
+                messageDiv.textContent = text;
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                return messageDiv;
+            }
+
+            sendButton.addEventListener('click', sendMessage);
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
                 }
             });
-
-            document.getElementById('stopAnimation').addEventListener('click', () => {
-                if (idleAction) {
-                    idleAction.stop();
-                }
-            });
-
-            // Utility buttons
-            document.getElementById('getValues').addEventListener('click', getCurrentValues);
-            document.getElementById('resetCamera').addEventListener('click', resetCamera);
-        }
-
-        function updateCamera() {
-            const posX = parseFloat(document.getElementById('camXNum').value);
-            const posY = parseFloat(document.getElementById('camYNum').value);
-            const posZ = parseFloat(document.getElementById('camZNum').value);
-            
-            const lookX = parseFloat(document.getElementById('lookXNum').value);
-            const lookY = parseFloat(document.getElementById('lookYNum').value);
-            const lookZ = parseFloat(document.getElementById('lookZNum').value);
-            
-            camera.position.set(posX, posY, posZ);
-            controls.target.set(lookX, lookY, lookZ);
-            controls.update();
-        }
-
-        function updateModelRotation() {
-            if (!model) return;
-            
-            const rotX = parseFloat(document.getElementById('rotXNum').value);
-            const rotY = parseFloat(document.getElementById('rotYNum').value);
-            const rotZ = parseFloat(document.getElementById('rotZNum').value);
-            
-            model.rotation.set(rotX, rotY, rotZ);
-        }
-
-        function getCurrentValues() {
-            const output = document.getElementById('output');
-            const values = `Camera Position: ${camera.position.x.toFixed(2)}, ${camera.position.y.toFixed(2)}, ${camera.position.z.toFixed(2)}
-Camera Look At: ${controls.target.x.toFixed(2)}, ${controls.target.y.toFixed(2)}, ${controls.target.z.toFixed(2)}
-Model Rotation: ${model ? model.rotation.x.toFixed(2) : 0}, ${model ? model.rotation.y.toFixed(2) : 0}, ${model ? model.rotation.z.toFixed(2) : 0}`;
-            
-            output.textContent = values;
-            console.log(values);
-        }
-
-        function resetCamera() {
-            document.getElementById('camX').value = document.getElementById('camXNum').value = 0;
-            document.getElementById('camY').value = document.getElementById('camYNum').value = 0;
-            document.getElementById('camZ').value = document.getElementById('camZNum').value = 5;
-            document.getElementById('lookX').value = document.getElementById('lookXNum').value = 0;
-            document.getElementById('lookY').value = document.getElementById('lookYNum').value = 0;
-            document.getElementById('lookZ').value = document.getElementById('lookZNum').value = 0;
-            document.getElementById('rotX').value = document.getElementById('rotXNum').value = 0;
-            document.getElementById('rotY').value = document.getElementById('rotYNum').value = 0;
-            document.getElementById('rotZ').value = document.getElementById('rotZNum').value = 0;
-            
-            updateCamera();
-            updateModelRotation();
         }
 
         const clock = new THREE.Clock();
