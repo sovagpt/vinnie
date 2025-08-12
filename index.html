@@ -23,15 +23,15 @@
         
         @keyframes slideInFromBottom {
             0% {
-                transform: translate(-50%, 100vh) scale(0.8);
+                transform: translate(-150vw, -100vh) scale(0.7) rotate(-10deg);
                 opacity: 0;
             }
-            60% {
-                transform: translate(-50%, -30px) scale(1.05);
+            70% {
+                transform: translate(-45%, -20px) scale(1.05) rotate(2deg);
                 opacity: 1;
             }
             100% {
-                transform: translate(-50%, 0) scale(1);
+                transform: translate(-50%, 0) scale(1) rotate(0deg);
                 opacity: 1;
             }
         }
@@ -218,6 +218,10 @@
             animation-delay: 1s;
         }
         
+        .social-btn:nth-child(3) {
+            animation-delay: 1.5s;
+        }
+        
         .social-btn:hover {
             transform: scale(1.1) translateY(-5px);
             border-color: #64ffda;
@@ -305,6 +309,9 @@
         <a href="https://x.com" target="_blank" class="social-btn" title="X (Twitter)">
             <img src="https://cdn.prod.website-files.com/6740d85c4e3daeef29a89470/688401711f7c1c43849d13a6_HIMACZhOn7YJ71dTu-actor-2fSSfmZramPBO73OK-iBihnF3pbp-dexpng%20(2).png" alt="X">
         </a>
+        <a href="https://www.illusionoflife.inc/" target="_blank" class="social-btn" title="Illusion of Life">
+            <img src="https://cdn.prod.website-files.com/6740d85c4e3daeef29a89470/688401711f7c1c43849d13a6_HIMACZhOn7YJ71dTu-actor-2fSSfmZramPBO73OK-iBihnF3pbp-dexpng%20(2).png" alt="Illusion of Life">
+        </a>
     </div>
     
     <div id="chat-container">
@@ -371,6 +378,7 @@
             // Controls
             controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
+            controls.enabled = false; // Disable mouse controls
             controls.target.set(-0.33, 0.52, -0.38);
 
             // Load GLB
