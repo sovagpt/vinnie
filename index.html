@@ -75,22 +75,22 @@
     <div id="controls">
         <div class="control-group">
             <h3>Camera Position</h3>
-            <label>X:</label><input type="range" id="camX" min="-10" max="10" step="0.1" value="0">
-            <input type="number" id="camXNum" step="0.1" value="0"><br>
-            <label>Y:</label><input type="range" id="camY" min="-10" max="10" step="0.1" value="0">
-            <input type="number" id="camYNum" step="0.1" value="0"><br>
-            <label>Z:</label><input type="range" id="camZ" min="-10" max="10" step="0.1" value="5">
-            <input type="number" id="camZNum" step="0.1" value="5"><br>
+            <label>X:</label><input type="range" id="camX" min="-10" max="10" step="0.1" value="-0.45">
+            <input type="number" id="camXNum" step="0.1" value="-0.45"><br>
+            <label>Y:</label><input type="range" id="camY" min="-10" max="10" step="0.1" value="1.03">
+            <input type="number" id="camYNum" step="0.1" value="1.03"><br>
+            <label>Z:</label><input type="range" id="camZ" min="-10" max="10" step="0.1" value="1.87">
+            <input type="number" id="camZNum" step="0.1" value="1.87"><br>
         </div>
         
         <div class="control-group">
             <h3>Camera Look At</h3>
-            <label>X:</label><input type="range" id="lookX" min="-10" max="10" step="0.1" value="0">
-            <input type="number" id="lookXNum" step="0.1" value="0"><br>
-            <label>Y:</label><input type="range" id="lookY" min="-10" max="10" step="0.1" value="0">
-            <input type="number" id="lookYNum" step="0.1" value="0"><br>
-            <label>Z:</label><input type="range" id="lookZ" min="-10" max="10" step="0.1" value="0">
-            <input type="number" id="lookZNum" step="0.1" value="0"><br>
+            <label>X:</label><input type="range" id="lookX" min="-10" max="10" step="0.1" value="-0.33">
+            <input type="number" id="lookXNum" step="0.1" value="-0.33"><br>
+            <label>Y:</label><input type="range" id="lookY" min="-10" max="10" step="0.1" value="0.52">
+            <input type="number" id="lookYNum" step="0.1" value="0.52"><br>
+            <label>Z:</label><input type="range" id="lookZ" min="-10" max="10" step="0.1" value="-0.38">
+            <input type="number" id="lookZNum" step="0.1" value="-0.38"><br>
         </div>
         
         <div class="control-group">
@@ -137,7 +137,7 @@
 
             // Camera
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 0, 5);
+            camera.position.set(-0.45, 1.03, 1.87);
 
             // Renderer
             renderer = new THREE.WebGLRenderer({ 
@@ -157,6 +157,7 @@
             // Controls
             controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
+            controls.target.set(-0.33, 0.52, -0.38);
 
             // Load GLB
             const loader = new GLTFLoader();
@@ -174,13 +175,15 @@
                         const idleClip = gltf.animations.find(clip => clip.name === 'Vinnie Idle');
                         if (idleClip) {
                             idleAction = mixer.clipAction(idleClip);
-                            console.log('Found Vinnie Idle animation');
+                            idleAction.play(); // Auto-play Vinnie Idle
+                            console.log('Found and playing Vinnie Idle animation');
                         } else {
                             console.log('Available animations:', gltf.animations.map(a => a.name));
                             // If no "Vinnie Idle", use first animation
                             if (gltf.animations[0]) {
                                 idleAction = mixer.clipAction(gltf.animations[0]);
-                                console.log('Using first animation:', gltf.animations[0].name);
+                                idleAction.play(); // Auto-play first animation
+                                console.log('Using and playing first animation:', gltf.animations[0].name);
                             }
                         }
                     }
